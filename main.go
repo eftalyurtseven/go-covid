@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -24,7 +25,8 @@ func StrToInt(str string) (int, error) {
 }
 
 func main() {
-
+	log.Println("Program started")
+	defer log.Println("Ended")
 	db, err := config.Connect()
 	if err != nil {
 		panic(err)
