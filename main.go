@@ -12,8 +12,10 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/eftalyurtseven/go-covid/src/config"
 	"github.com/eftalyurtseven/go-covid/src/models"
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func StrToInt(str string) (int, error) {
@@ -24,14 +26,13 @@ func StrToInt(str string) (int, error) {
 	return strconv.Atoi(nonFractionalPart[0])
 }
 
-func main() {
+func insert() {
 	log.Println("Program started")
 	defer log.Println("Ended")
 	db, err := config.Connect()
 	if err != nil {
 		panic(err)
 	}
-
 	f, err := excelize.OpenFile("covid.xlsx")
 	if err != nil {
 		fmt.Println(err)
@@ -72,9 +73,19 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		dayFormatted := row[1]
+		monthFormatted := row[2]
+		if len(dayFormatted) == 1 {
+			dayFormatted = "0" + dayFormatted
+		}
+		if len(monthFormatted) == 1 {
+			monthFormatted = "0" + monthFormatted
+		}
+
+		dateRep := row[3] + "-" + monthFormatted + "-" + dayFormatted
 
 		var caseModel models.Case
-		caseModel.DateRep = row[0]
+		caseModel.DateRep = dateRep
 		caseModel.Day = day
 		caseModel.Month = month
 		caseModel.Year = year
@@ -89,5 +100,32 @@ func main() {
 		caseModel.Insert(context.Background(), db, boil.Infer())
 
 	}
+}
 
+func main() {
+	db, err := config.Connect()
+	if err != nil {
+		panic(err)
+	}
+	r := gin.Default()
+	r.GET("/cases", func(c *gin.Context) {
+		date := c.Query("date")
+		country := c.Query("country")
+		fmt.Println(date)
+		fmt.Println(country)
+
+		ctx := context.Background()
+		cases, err := models.Cases(
+			qm.Where("countryterritoryCode = ? AND dateRep like ?", country, "%"+date+"%"),
+		).One(ctx, db)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		c.JSON(200, gin.H{
+			"message": "success",
+			"result":  cases,
+		})
+	})
+	r.Run()
 }
