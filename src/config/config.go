@@ -7,7 +7,13 @@ import (
 )
 
 func Connect() (*sql.DB, error) {
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/covid?parseTime=true")
+
+	databaseHost := "127.0.0.1"
+	databasePort := "3306"
+	databaseName := "covid"
+	databaseUser := "root"
+	databasePass := ""
+	db, err := sql.Open("mysql", databaseUser+":"+databasePass+"@tcp("+databaseHost+":"+databasePort+")/"+databaseName+"?parseTime=true")
 	if err != nil {
 		return nil, err
 	}
