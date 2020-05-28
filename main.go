@@ -3,45 +3,89 @@ package main
 //go:generate sqlboiler --wipe mysql
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"strconv"
+	"strings"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/eftalyurtseven/go-covid/src/config"
+	"github.com/eftalyurtseven/go-covid/src/models"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
+
+func StrToInt(str string) (int, error) {
+	if len(str) == 0 {
+		return 0, nil
+	}
+	nonFractionalPart := strings.Split(str, ".")
+	return strconv.Atoi(nonFractionalPart[0])
+}
 
 func main() {
 
-	_, err := config.Connect("root:@tcp(127.0.0.1:3306)/demo?parseTime=true")
+	db, err := config.Connect()
 	if err != nil {
-		log.Fatalf("failed to mysql open %+v", err)
+		panic(err)
 	}
 
-	// set global database
-	// boil.SetDB(db)
+	f, err := excelize.OpenFile("covid.xlsx")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	/*
-		u := &models.Case{
-			DateRep:                 "test",
-			Day:                     1,
-			Month:                   1,
-			Year:                    1,
-			Cases:                   1,
-			Deaths:                  1,
-			CountriesAndTerritories: "1",
-			GeoID:                   "1",
-			CountryterritoryCode:    "1",
-			PopData2018:             1,
-			ContinentExp:            "1",
+	rows := f.GetRows("COVID-19-geographic-disbtributi")
+	for index, row := range rows {
+		if index == 0 {
+			continue
 		}
-		var tx *sql.Tx
-		var ctx context.Context
-		ctx, _ = context.WithTimeout(context.Background(), 15*time.Second)
-		tx, err = db.BeginTx(ctx, nil)
-		err1 := u.Insert(context.Background(), tx, boil.Infer())
-		if err1 != nil {
-			fmt.Println(err1)
+		day, err := StrToInt(row[1])
+		if err != nil {
+			panic(err)
 		}
-		fmt.Println("db")
-		fmt.Println("inserted")
-	*/
+
+		month, err := StrToInt(row[2])
+		if err != nil {
+			panic(err)
+		}
+
+		year, err := StrToInt(row[3])
+		if err != nil {
+			panic(err)
+		}
+
+		cases, err := StrToInt(row[4])
+		if err != nil {
+			panic(err)
+		}
+
+		deaths, err := StrToInt(row[5])
+		if err != nil {
+			panic(err)
+		}
+
+		popData, err := StrToInt(row[9])
+		if err != nil {
+			panic(err)
+		}
+
+		var caseModel models.Case
+		caseModel.DateRep = row[0]
+		caseModel.Day = day
+		caseModel.Month = month
+		caseModel.Year = year
+		caseModel.Cases = cases
+		caseModel.Deaths = deaths
+		caseModel.CountriesAndTerritories = row[6]
+		caseModel.GeoID = row[7]
+		caseModel.CountryterritoryCode = row[8]
+		caseModel.PopData2018 = popData
+		caseModel.ContinentExp = row[10]
+
+		caseModel.Insert(context.Background(), db, boil.Infer())
+
+	}
+
 }
