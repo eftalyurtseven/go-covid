@@ -53,6 +53,7 @@ func GetCases(c *gin.Context) {
 			"status":  "error",
 			"message": "Date can't converted!",
 		})
+		return
 	}
 	db, err := config.Connect()
 	if err != nil {
