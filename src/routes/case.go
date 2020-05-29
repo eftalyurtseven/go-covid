@@ -60,6 +60,7 @@ func GetCases(c *gin.Context) {
 		utils.SendSlackNotification(1, "DB Connection Err: "+err.Error())
 		return
 	}
+	defer db.Close()
 	ctx := context.Background()
 	check, err := models.Cases(
 		qm.Where("countryterritoryCode = ?", postCountry),
