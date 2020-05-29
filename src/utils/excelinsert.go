@@ -104,5 +104,6 @@ func Insert() {
 			SendSlackNotification(1, err.Error())
 			fmt.Println(err)
 		}
+		fmt.Println(dateRep + " - " + caseModel.CountryterritoryCode + " inserted!")
 	}
 }

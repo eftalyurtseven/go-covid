@@ -7,12 +7,11 @@ import (
 )
 
 func Connect() (*sql.DB, error) {
-
-	databaseHost := "127.0.0.1"
+	databaseHost := "qzkp8ry756433yd4.cbetxkdyhwsb.us-east-1.rds.amazonaws.com"
 	databasePort := "3306"
-	databaseName := "covid"
-	databaseUser := "root"
-	databasePass := ""
+	databaseName := "n5mt92h8iv9gvg7i"
+	databaseUser := "ct49wr3k1p0a8gis"
+	databasePass := "kmqgdy4auqs1ln5p"
 	db, err := sql.Open("mysql", databaseUser+":"+databasePass+"@tcp("+databaseHost+":"+databasePort+")/"+databaseName+"?parseTime=true")
 	if err != nil {
 		return nil, err

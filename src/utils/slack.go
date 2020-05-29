@@ -15,9 +15,9 @@ type SlackRequestBody struct {
 // SendSlackNotification will post to an 'Incoming Webook' url setup in Slack Apps. It accepts
 // some text and the slack channel is saved within Slack.
 func SendSlackNotification(msgType int, msg string) error {
-	webhookUrl := "https://hooks.slack.com/services/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"
+	webhookUrl := "https://hooks.slack.com/services/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"
 	if msgType == 2 {
-		webhookUrl = "https://hooks.slack.com/services/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"
+		webhookUrl = "https://hooks.slack.com/services/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"
 	}
 	slackBody, _ := json.Marshal(SlackRequestBody{Text: msg})
 	req, err := http.NewRequest(http.MethodPost, webhookUrl, bytes.NewBuffer(slackBody))
