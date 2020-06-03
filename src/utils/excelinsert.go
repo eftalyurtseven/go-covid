@@ -3,7 +3,10 @@ package utils
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,6 +23,7 @@ func StrToInt(str string) (int, error) {
 	nonFractionalPart := strings.Split(str, ".")
 	return strconv.Atoi(nonFractionalPart[0])
 }
+
 func Insert() {
 	log.Println("Program started")
 	defer log.Println("Ended")
@@ -106,4 +110,24 @@ func Insert() {
 		}
 		fmt.Println(dateRep + " - " + caseModel.CountryterritoryCode + " inserted!")
 	}
+}
+func DownloadFile(filepath string, url string) error {
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

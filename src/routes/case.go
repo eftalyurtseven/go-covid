@@ -19,21 +19,21 @@ type GetParams struct {
 
 func GetCases(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
-	var loginCmd GetParams
-	c.BindJSON(&loginCmd)
-	postDate := loginCmd.Date
-	postCountry := loginCmd.CountryCode
+	var parameters = new(GetParams)
+	err := c.BindJSON(&parameters)
+	if err != nil {
+		utils.SendSlackNotification(1, "Json parse error: "+err.Error())
+		c.JSON(400, gin.H{
+			"status": "json_parse_error",
+		})
+		return
+	}
+	postDate := parameters.Date
+	postCountry := parameters.CountryCode
 	if len(postDate) == 0 || len(postCountry) == 0 {
 		c.JSON(400, gin.H{
 			"status":  "error",
 			"message": "Please send date and country code!",
-		})
-		return
-	}
-	if len(postDate) != 10 {
-		c.JSON(400, gin.H{
-			"status":  "error",
-			"message": "Invalid date format!",
 		})
 		return
 	}
@@ -46,7 +46,7 @@ func GetCases(c *gin.Context) {
 		return
 	}
 
-	_, err := time.Parse("2006-01-02", postDate)
+	_, err = time.Parse("2006-01-02", postDate)
 	if err != nil {
 		fmt.Println("Err", err)
 		c.JSON(400, gin.H{
