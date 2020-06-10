@@ -18,13 +18,14 @@ func main() {
 	ctab := crontab.New() // create cron table
 
 	// AddJob and test the errors
-	err := ctab.AddJob("* * * * *", cronFunc) // on 1st day of month
+	err := ctab.AddJob("0 0 * * *", cronFunc) // on 1st day of month
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	router := gin.Default()
 	router.POST("/cases", routes.GetCases)
+	router.POST("/auth/register", routes.Register)
 	router.Run()
 
 	/*
